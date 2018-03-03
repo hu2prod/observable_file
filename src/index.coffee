@@ -29,6 +29,7 @@ class Observable_file
         @dispatch "ready"
       
       # https://nodejs.org/docs/latest-v6.x/api/fs.html#fs_inodes
+      # https://github.com/paulmillr/chokidar/issues/591 for alternative solution
       @_watcher.on 'raw', (ev)=>
         if ev == 'rename'
           @_watcher_restart()
