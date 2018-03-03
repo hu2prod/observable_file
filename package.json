@@ -1,0 +1,33 @@
+{
+  "name": "observable_file",
+  "version": "1.0.0",
+  "description": "portable event emitter analog",
+  "main": "lib/index.js",
+  "scripts": {
+    "install": "iced -o lib -c src",
+    "test": "mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test-simple": "mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report",
+    "test-watch": "mocha --compilers coffee:iced-coffee-script/register --watch --full-trace --watch-extensions=js,coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hu2prod/observable_file.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hu2prod/observable_file/issues"
+  },
+  "homepage": "https://github.com/hu2prod/observable_file#readme",
+  "devDependencies": {
+    "coveralls": "^2.11.16",
+    "iced-coffee-coverage": "^1.0.21",
+    "iced-coffee-script": "^108.0.11",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0"
+  },
+  "dependencies": {
+    "chokidar": "^2.0.2",
+    "event_mixin": "github:hu2prod/event_mixin"
+  }
+}
