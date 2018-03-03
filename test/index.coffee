@@ -11,8 +11,8 @@ file = "./tmp_file"
 # Прим в случае fail все тесты могут завалтится по цепочке т.к. не будут удалены watcher'ы
 delay = (cb)->setTimeout cb, 100
 
-describe 'index section', ()->
-  describe 'async API', ()->
+describe 'index section >', ()->
+  describe 'async API >', ()->
     it 'init', ()->
       if fs.existsSync file
         fs.unlinkSync file
@@ -62,7 +62,7 @@ describe 'index section', ()->
       on_end()
       return
   
-  describe 'sync API', ()->
+  describe 'sync API >', ()->
     it 'init', ()->
       if fs.existsSync file
         fs.unlinkSync file
@@ -100,49 +100,116 @@ describe 'index section', ()->
       json_eq data, {b:1}
       return
     
-  describe 'events', ()->
-    it 'change trigger on self sync change', (on_end)->
-      if fs.existsSync file
-        fs.unlinkSync file
-      obs = new mod file
-      await obs.once "ready", defer()
-      fire = 0
-      obs.on "change", ()-> fire++
-      obs.setSync {b:1}
-      await delay defer()
-      obs.delete()
-      
-      assert.equal fire, 1
-      on_end()
+  describe 'events >', ()->
+    describe 'sync >', ()->
+      it 'change trigger on self change', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()-> fire++
+        obs.setSync {b:1}
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 1
+        on_end()
     
-    it 'change trigger on self sync change multiple', (on_end)->
-      if fs.existsSync file
-        fs.unlinkSync file
-      obs = new mod file
-      await obs.once "ready", defer()
-      fire = 0
-      obs.on "change", ()-> fire++
-      obs.setSync {b:1}
-      obs.setSync {c:1}
-      await delay defer()
-      obs.delete()
-      
-      assert.equal fire, 1
-      on_end()
+      it 'change trigger on self change multiple', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()-> fire++
+        obs.setSync {b:1}
+        obs.setSync {c:1}
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 1
+        on_end()
     
-    it 'change trigger on self async change', (on_end)->
-      if fs.existsSync file
-        fs.unlinkSync file
-      obs = new mod file
-      await obs.once "ready", defer()
-      fire = 0
-      obs.on "change", ()-> fire++
-      await obs.set {b:1}, defer(err); return on_end err if err
-      await delay defer()
-      obs.delete()
+      it 'change trigger on self change multiple wait same', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()-> fire++
+        obs.setSync {b:1}
+        await delay defer()
+        obs.setSync {b:1}
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 1
+        on_end()
+    
+      it 'change trigger on self change multiple wait different', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()->fire++
+        obs.setSync {b:1}
+        await delay defer()
+        obs.setSync {c:1}
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 2
+        on_end()
+    
+    describe 'async >', ()->
+      it 'change trigger on self async change', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()-> fire++
+        await obs.set {b:1}, defer(err); return on_end err if err
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 1
+        on_end()
       
-      assert.equal fire, 1
-      on_end()
+      it 'change trigger on self async change multiple same', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()-> fire++
+        await obs.set {b:1}, defer(err); return on_end err if err
+        await delay defer()
+        await obs.set {b:1}, defer(err); return on_end err if err
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 1
+        on_end()
+      
+      it 'change trigger on self async change multiple different', (on_end)->
+        if fs.existsSync file
+          fs.unlinkSync file
+        obs = new mod file
+        await obs.once "ready", defer()
+        fire = 0
+        obs.on "change", ()->fire++
+        await obs.set {b:1}, defer(err); return on_end err if err
+        await delay defer()
+        await obs.set {c:1}, defer(err); return on_end err if err
+        await delay defer()
+        obs.delete()
+        
+        assert.equal fire, 2
+        on_end()
+      
     
     it 'change trigger on external change', (on_end)->
       if fs.existsSync file
@@ -212,12 +279,37 @@ describe 'index section', ()->
       assert.equal fire, 0
       on_end()
       
-    it 'no change trigger on file delete'
+    it 'no change trigger on file delete', (on_end)->
+      obs = new mod file
+      await obs.once "ready", defer()
+      await obs.set {c:1}, defer(err); return on_end err if err
+      await delay defer()
+      fire = 0
+      obs.on "change", ()-> fire++
+      fs.unlinkSync file
+      await delay defer()
+      obs.delete()
       
-    it 'no change trigger on file corrupt'
+      assert.equal fire, 0
+      on_end()
+      
+    it 'no change trigger on file corrupt', (on_end)->
+      obs = new mod file
+      await obs.once "ready", defer()
+      await obs.set {c:1}, defer(err); return on_end err if err
+      await delay defer()
+      fire = 0
+      obs.on "change", ()-> fire++
+      fs.writeFileSync file, 'corrupt'
+      await delay defer()
+      obs.delete()
+      
+      assert.equal fire, 0
+      on_end()
+      
       
   
-  describe 'errors', ()->
+  describe 'errors >', ()->
     it 'corrupt file open async', (on_end)->
       fs.writeFileSync file, 'corrupt'
       obs = new mod file
@@ -236,7 +328,7 @@ describe 'index section', ()->
     it 'file with no read permission'
       
   
-  describe 'finish', ()->
+  describe 'finish >', ()->
     it 'finish', ()->
       fs.unlinkSync file
   
