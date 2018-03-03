@@ -100,6 +100,13 @@ describe 'index section >', ()->
       json_eq data, {b:1}
       return
     
+    it 'remove file + set', ()->
+      obs = new mod file
+      fs.unlinkSync file
+      obs.setSync {b:1}
+      obs.delete()
+      return
+    
   describe 'events >', ()->
     describe 'sync >', ()->
       it 'change trigger on self change', (on_end)->
