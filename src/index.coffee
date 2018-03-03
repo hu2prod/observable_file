@@ -5,9 +5,8 @@ chokidar = require 'chokidar'
 class Observable_file
   path    : ''
   _watcher: null
-  # _last_debounce_ts : 0
-  pack : JSON.stringify
-  unpack : JSON.parse
+  pack    : JSON.stringify
+  unpack  : JSON.parse
   
   event_mixin @
   constructor:(@path)->
