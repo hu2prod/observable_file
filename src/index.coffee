@@ -6,6 +6,8 @@ class Observable_file
   path    : ''
   _watcher: null
   # _last_debounce_ts : 0
+  pack : JSON.stringify
+  unpack : JSON.parse
   
   event_mixin @
   constructor:(@path)->
@@ -28,6 +30,7 @@ class Observable_file
       if first_time
         @dispatch "ready"
       
+      # TODO make for/pull request of chokidar and fix it there
       # https://nodejs.org/docs/latest-v6.x/api/fs.html#fs_inodes
       # https://github.com/paulmillr/chokidar/issues/591 for alternative solution
       @_watcher.on 'raw', (ev)=>
@@ -52,13 +55,13 @@ class Observable_file
   get : (cb)->
     await fs.readFile @path, defer(err, data); return cb err if err
     try
-      cb null, JSON.parse data
+      cb null, @unpack data
     catch e
       return cb e
     return
   
   set : (data, on_end)->
-    write_data = JSON.stringify data
+    write_data = @pack data
     tmp = @path+".tmp"
     await fs.exists @path, defer(exists)
     if exists
@@ -75,10 +78,10 @@ class Observable_file
   #    sync
   # ###################################################################################################
   getSync : ()->
-    JSON.parse fs.readFileSync @path
+    @unpack fs.readFileSync @path
   
   setSync : (data)->
-    write_data = JSON.stringify data
+    write_data = @pack data
     if fs.existsSync @path
       check_data = fs.readFileSync @path, 'utf-8'
       if write_data == check_data
