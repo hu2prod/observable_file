@@ -9,10 +9,13 @@ class Observable_file
   unpack  : JSON.parse
   
   event_mixin @
-  constructor:(@path)->
+  constructor:(@path, opt = {})->
+    @pack   = opt.pack    if opt.pack
+    @unpack = opt.unpack  if opt.unpack
+    
     event_mixin_constructor @
     if !fs.existsSync @path
-      fs.writeFileSync @path, "{}"
+      fs.writeFileSync @path, @pack {}
     
     @_watcher_restart()
   

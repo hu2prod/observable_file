@@ -315,6 +315,16 @@ describe 'index section >', ()->
       on_end()
       
       
+  describe 'custom pack >', ()->
+    it 'JSON pretty pack', ()->
+      obs = new mod file, {
+        pack   : (t)-> JSON.stringify t, null, 2
+        unpack : JSON.parse
+      }
+      obs.setSync expected = {a:1}
+      actual = obs.getSync()
+      json_eq expected, actual
+      obs.delete()
   
   describe 'errors >', ()->
     it 'corrupt file open async', (on_end)->
