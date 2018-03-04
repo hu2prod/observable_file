@@ -9,7 +9,7 @@ class Observable_file
   unpack  : JSON.parse
   _last_raw_data : ''
   truncate_reread_counter : 0
-  truncate_reread_max : 10
+  truncate_reread_max : 100
   
   event_mixin @
   constructor:(@path, opt = {})->
