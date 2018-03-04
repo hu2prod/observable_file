@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "chokidar": "^2.0.2",
-    "event_mixin": "github:hu2prod/event_mixin"
+    "event_mixin": "github:hu2prod/event_mixin",
+    "iced-runtime": "^1.0.3"
   }
 }
