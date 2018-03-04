@@ -69,6 +69,18 @@ class Observable_file
         on_end null
         return
     await fs.writeFile tmp, write_data, defer(err); return on_end err if err
+    # http://stupidpythonideas.blogspot.com/2014/07/getting-atomic-writes-right.html
+    # recheck data needed because file was not flushed to disk
+    # or event race condition
+    await fs.readFile tmp, 'utf-8', defer(err, recheck_data); return on_end err if err
+    if recheck_data != write_data
+      err = new Error """
+        WARNING. Write to '#{tmp}' failed for some strange reason (writeFile doesn't throws error).
+        You possibly launches 2+ instances that uses single file and they replaced file simultaneously.
+        It's probably ok. Data swap prevented because non-valid data can pass to main file
+        """
+      perr err
+      return on_end err
     await fs.rename tmp, @path, defer(err); return on_end err if err
     on_end null
     return
@@ -88,6 +100,19 @@ class Observable_file
     
     tmp = @path+".tmp"
     fs.writeFileSync tmp, write_data
+    # http://stupidpythonideas.blogspot.com/2014/07/getting-atomic-writes-right.html
+    # recheck data needed because file was not flushed to disk
+    # or event race condition
+    recheck_data = fs.readFileSync tmp, 'utf-8'
+    if recheck_data != write_data
+      err = new Error """
+        WARNING. Write to '#{tmp}' failed for some strange reason (writeFile doesn't throws error).
+        You possibly launches 2+ instances that uses single file and they replaced file simultaneously.
+        It's probably ok. Data swap prevented because non-valid data can pass to main file
+        """
+      perr err
+      throw err
+    
     fs.renameSync tmp, @path
     return
   
