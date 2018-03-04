@@ -55,7 +55,7 @@ class Observable_file
   #    async
   # ###################################################################################################
   get : (cb)->
-    await fs.readFile @path, defer(err, data); return cb err if err
+    await fs.readFile @path, 'utf-8', defer(err, data); return cb err if err
     try
       cb null, @unpack data
     catch e
@@ -92,7 +92,7 @@ class Observable_file
   #    sync
   # ###################################################################################################
   getSync : ()->
-    @unpack fs.readFileSync @path
+    @unpack fs.readFileSync @path, 'utf-8'
   
   setSync : (data)->
     write_data = @pack data
