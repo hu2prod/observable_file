@@ -7,6 +7,9 @@ class Observable_file
   _watcher: null
   pack    : JSON.stringify
   unpack  : JSON.parse
+  _last_raw_data : ''
+  truncate_reread_counter : 0
+  truncate_reread_max : 10
   
   event_mixin @
   constructor:(@path, opt = {})->
@@ -49,13 +52,20 @@ class Observable_file
   change : ()->
     await @get defer(err, data)
     if err
+      if @_last_raw_data == ""
+        if @truncate_reread_counter < @truncate_reread_max
+          @truncate_reread_counter++
+          return call_later ()=>@change()
+      @truncate_reread_counter = 0
       return perr "WARNING suppress change event due:", err
+    @truncate_reread_counter = 0
     @dispatch "change", data
   # ###################################################################################################
   #    async
   # ###################################################################################################
   get : (cb)->
     await fs.readFile @path, 'utf-8', defer(err, data); return cb err if err
+    @_last_raw_data = data
     try
       cb null, @unpack data
     catch e
@@ -92,7 +102,7 @@ class Observable_file
   #    sync
   # ###################################################################################################
   getSync : ()->
-    @unpack fs.readFileSync @path, 'utf-8'
+    @unpack @_last_raw_data = fs.readFileSync @path, 'utf-8'
   
   setSync : (data)->
     write_data = @pack data
